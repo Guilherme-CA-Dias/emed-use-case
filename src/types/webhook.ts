@@ -1,5 +1,4 @@
 export interface WebhookPayload {
-  type: 'api-request'
   data: {
     request: {
       method: string
@@ -37,6 +36,10 @@ export interface WebhookPayload {
           }
         }
       }
+    }
+    response?: {
+      status: number
+      data: any
     }
   }
 } 
