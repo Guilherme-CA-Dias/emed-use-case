@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     await connectDB()
 
     const payload = await request.json() as WebhookPayload
-    console.log('Webhook payload:', JSON.stringify(payload, null, 2))
+
 
     // Simplified validation
     if (!payload?.event || !payload?.record) {

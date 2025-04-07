@@ -1,14 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import { ContactsTable } from "./components/contacts-table"
+import { CreateContactModal } from "./components/create-contact-modal"
 import { useContacts } from "@/hooks/use-contacts"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { RefreshCw, Download, Search, Loader2 } from "lucide-react"
+import { RefreshCw, Download, Search, Loader2, UserPlus } from "lucide-react"
 import { useEffect } from "react"
 import { useIntegrations } from "@integration-app/react"
 
 export default function ContactsPage() {
+  const [createModalOpen, setCreateModalOpen] = useState(false)
   const { 
     contacts, 
     isLoading,
@@ -19,7 +22,8 @@ export default function ContactsPage() {
     handleSearch,
     refresh, 
     loadMore, 
-    importContacts 
+    importContacts,
+    customerId
   } = useContacts()
   const { integrations } = useIntegrations()
 
@@ -57,6 +61,10 @@ export default function ContactsPage() {
             <p className="text-muted-foreground">View all your contacts</p>
           </div>
           <div className="flex gap-2">
+            <Button onClick={() => setCreateModalOpen(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Create Contact
+            </Button>
             <Button onClick={importContacts} disabled={isLoading || isSearching}>
               <Download className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
               Import
@@ -119,6 +127,12 @@ export default function ContactsPage() {
           </div>
         )}
       </div>
+
+      <CreateContactModal 
+        open={createModalOpen}
+        onOpenChange={setCreateModalOpen}
+        customerId={customerId}
+      />
     </div>
   )
 } 

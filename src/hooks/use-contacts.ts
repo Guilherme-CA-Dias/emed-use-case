@@ -12,6 +12,9 @@ export function useContacts() {
   const [hasMore, setHasMore] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
 
+  // Get customerId from API response instead
+  const [customerId, setCustomerId] = useState("")
+
   const fetchContacts = async (resetData: boolean = false, isSearchRequest: boolean = false) => {
     if (isSearchRequest) {
       setIsSearching(true)
@@ -45,6 +48,11 @@ export function useContacts() {
 
       const data = await response.json()
       
+      // Get customerId from the response
+      if (data.customerId) {
+        setCustomerId(data.customerId)
+      }
+
       // Create a Set of existing contact IDs
       const existingIds = new Set(contacts.map(c => c._id))
       
@@ -114,6 +122,7 @@ export function useContacts() {
     handleSearch,
     refresh,
     loadMore,
-    importContacts
+    importContacts,
+    customerId
   }
 } 

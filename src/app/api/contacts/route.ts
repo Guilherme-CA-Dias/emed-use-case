@@ -54,7 +54,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       contacts: results,
-      cursor: hasMore ? results[results.length - 1]._id : null
+      cursor: hasMore ? results[results.length - 1]._id : null,
+      customerId: auth.customerId
     })
   } catch (error) {
     console.error('Error fetching contacts:', error)
