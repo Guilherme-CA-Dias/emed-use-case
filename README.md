@@ -1,94 +1,160 @@
 # Integration Use Case Template
 
-This is a template for an application showcasing integration capabilities using [Integration.app](https://integration.app). The app is built with Next.js and demonstrates how to implement user authentication and integration token generation.
+A Next.js application demonstrating integration capabilities using [Integration.app](https://integration.app). This template showcases real-world integration patterns including contact management, webhook handling, and flow execution monitoring.
+
+## Features
+
+- 🔐 Authentication & Authorization
+- 👥 Contact Management
+- 🔄 Real-time Integration Flow Monitoring
+- 🪝 Webhook Processing
+- 🎨 Modern UI with Tailwind CSS
+- 📱 Responsive Design
+- 🌗 Dark Mode Support
 
 ## Prerequisites
 
-- Node.js 18+ installed
-- Integration.app workspace credentials (Workspace Key and Secret)
+- Node.js 18+
+- Integration.app workspace credentials
+- MongoDB database
 
 ## Setup
 
-1. Clone the repository:
-
+1. Clone and install:
 ```bash
 git clone <repository-url>
 cd <repository-name>
-```
-
-2. Install dependencies:
-
-```bash
 npm install
-# or
-yarn install
 ```
 
-3. Set up environment variables:
-
+2. Environment configuration:
 ```bash
-# Copy the sample environment file
 cp .env-sample .env
 ```
 
-4. Edit `.env` and add your Integration.app credentials:
-
+Required environment variables:
 ```env
-INTEGRATION_APP_WORKSPACE_KEY=your_workspace_key_here
-INTEGRATION_APP_WORKSPACE_SECRET=your_workspace_secret_here
+INTEGRATION_APP_WORKSPACE_KEY=your_workspace_key
+INTEGRATION_APP_WORKSPACE_SECRET=your_workspace_secret
 MONGODB_URI=your_mongodb_connection_string
 ```
 
-You can find these credentials in your Integration.app workspace settings.
-
-## Running the Application
-
-1. Start the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-2. Open [http://localhost:3000](http://localhost:3000) in your browser.
-
 ## Project Structure
 
-- `/src/app` - Next.js app router pages and API routes
-  - `/users` - Example implementation of external data import
-  - `/api` - Backend API routes for users and integration token management
-- `/src/components` - Reusable React components
-- `/src/lib` - Utility functions and helpers
-- `/src/models` - Data models and types
-- `/public` - Static assets
+```
+src/
+├── app/                    # Next.js App Router pages and API routes
+│   ├── api/               # Backend API endpoints
+│   │   ├── contacts/      # Contact management endpoints
+│   │   ├── webhooks/      # Webhook handlers
+│   │   └── integration-token/ # Token generation
+│   ├── contacts/          # Contact management UI
+│   ├── integrations/      # Integration management UI
+│   └── users/             # User management UI
+├── components/            # Reusable React components
+│   ├── ui/               # UI components (buttons, modals, etc.)
+│   └── shared/           # Shared components
+├── hooks/                # Custom React hooks
+├── lib/                  # Utility functions
+│   ├── integration-app-client.ts  # Integration.app SDK setup
+│   ├── integration-token.ts       # Token generation
+│   ├── mongodb.ts               # Database connection
+│   └── server-auth.ts          # Auth utilities
+├── models/               # MongoDB models
+└── types/               # TypeScript type definitions
+```
 
-## Template Features
+## Key Features Implementation
 
-### Authentication
+### Contact Management
 
-The template implements a simple authentication mechanism using a randomly generated UUID as the customer ID. This simulates a real-world scenario where your application would have proper user authentication. The customer ID is used to:
+The application implements a complete contact management system:
 
-- Identify the user/customer in the integration platform
-- Generate integration tokens for external app connections
-- Associate imported data with specific customers
+- Create, read, update, and delete contacts
+- Real-time synchronization with external systems
+- Webhook processing for contact updates
+- Flow execution monitoring
 
-### Users Example
+```typescript
+// Example: Creating a contact
+const response = await fetch('/api/contacts/create', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    ...getAuthHeaders()
+  },
+  body: JSON.stringify(contactData)
+})
+```
 
-The template includes a complete example of importing and managing users from an external application:
+### Integration Flow Monitoring
 
-- User data model and TypeScript types
-- API routes for user import and retrieval
-- React components for displaying user data
-- Integration with SWR for efficient data fetching
-- Example of using the Integration.app client for data import
+Monitors integration flow execution in real-time:
 
-## Available Scripts
+- Polls flow status
+- Handles various flow states (completed, failed)
+- Provides feedback on flow progress
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build the application for production
-- `npm run start` - Start the production server
-- `npm run lint` - Run ESLint to check code quality
+### Webhook Processing
+
+Robust webhook handling system:
+
+- Processes incoming webhooks from Integration.app
+- Updates local database based on webhook events
+- Handles various event types (created, updated, deleted)
+
+## API Routes
+
+- `POST /api/contacts/create` - Create new contact
+- `GET /api/contacts` - List contacts
+- `POST /api/webhooks/contacts` - Process contact webhooks
+- `GET /api/integration-token` - Generate integration tokens
+
+## Components
+
+### UI Components
+
+- `Modal` - Reusable modal dialog
+- `Button` - Styled button component
+- `Form` - Form components with validation
+
+### Feature Components
+
+- `ContactsTable` - Displays contact list
+- `CreateContactModal` - Contact creation form
+- `IntegrationsList` - Manages integrations
+
+## Development
+
+```bash
+# Development
+npm run dev
+
+# Production build
+npm run build
+npm start
+
+# Linting
+npm run lint
+```
+
+## Best Practices
+
+- Use SWR for data fetching
+- Include authorization headers in requests
+- Handle loading and error states
+- Implement proper type checking
+- Follow REST API conventions
+- Use environment variables for configuration
+
+## Error Handling
+
+The application implements comprehensive error handling:
+
+- API error responses
+- Flow execution monitoring
+- Webhook processing errors
+- Integration token generation failures
 
 ## License
 
