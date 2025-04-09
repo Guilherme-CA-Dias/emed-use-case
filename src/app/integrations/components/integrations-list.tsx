@@ -4,6 +4,10 @@ import { useIntegrationApp, useIntegrations } from "@integration-app/react"
 import type { Integration as IntegrationAppIntegration } from "@integration-app/sdk"
 import { useState } from "react"
 import { Loader2 } from "lucide-react"
+import { generateIntegrationToken } from '@/lib/integration-token'
+import { getAuthFromRequest } from '@/lib/server-auth'
+import { NextRequest } from 'next/server'
+
 
 export function IntegrationList() {
   const integrationApp = useIntegrationApp()
@@ -11,11 +15,37 @@ export function IntegrationList() {
   const [loadingIntegration, setLoadingIntegration] = useState<string | null>(null)
   const [configuringIntegration, setConfiguringIntegration] = useState<string | null>(null)
 
+  const runDependentsFlow = async (integration: IntegrationAppIntegration) => {
+    try {
+      const response = await fetch('/api/run-dependents-flow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ integrationKey: integration.key })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to run dependents flow')
+      }
+    } catch (error) {
+      console.error('Error running dependents flow:', error)
+    }
+  }
+
   const handleConnect = async (integration: IntegrationAppIntegration) => {
     try {
       setLoadingIntegration(integration.key)
-      await integrationApp.integration(integration.key).openNewConnection()
-      refresh()
+      const result = await integrationApp.integration(integration.key).openNewConnection()
+      console.log('Result:', result)
+      
+      // Wait for refresh to get the new connection
+      await refresh()
+      
+      // If we got a connection ID, run the dependents flow
+      if (result?.id) {
+        await runDependentsFlow(integration)
+      }
     } catch (error) {
       console.error("Failed to connect:", error)
     } finally {
@@ -41,9 +71,8 @@ export function IntegrationList() {
     try {
       setConfiguringIntegration(integration.key)
       await integrationApp
-        .connection(integration.connection.id)
-        .fieldMapping('contacts')
-        .openConfiguration()
+        .integration(integration.key)
+        .open()
     } catch (error) {
       console.error("Failed to open configuration:", error)
     } finally {

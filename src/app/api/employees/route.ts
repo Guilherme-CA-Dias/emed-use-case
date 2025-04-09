@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthFromRequest } from '@/lib/server-auth'
 import { getIntegrationClient } from '@/lib/integration-app-client'
 import connectDB from '@/lib/mongodb'
-import { Contact } from '@/models/contact'
+import { Employee } from '@/models/employee'
 
 export async function GET(request: NextRequest) {
   try {
@@ -42,25 +42,25 @@ export async function GET(request: NextRequest) {
       })
     }
     
-    // Find contacts for this customer, paginated
+    // Find employees for this customer, paginated
     const limit = 10
-    const contacts = await Contact.find(baseQuery)
-      .sort({ _id: -1 }) // Sort by _id instead of createdAt for more reliable pagination
-      .limit(limit + 1) // Get one extra to check if there are more
+    const employees = await Employee.find(baseQuery)
+      .sort({ _id: -1 })
+      .limit(limit + 1)
       
     // Check if there are more results
-    const hasMore = contacts.length > limit
-    const results = hasMore ? contacts.slice(0, -1) : contacts
+    const hasMore = employees.length > limit
+    const results = hasMore ? employees.slice(0, -1) : employees
 
     return NextResponse.json({
-      contacts: results,
+      employees: results,
       cursor: hasMore ? results[results.length - 1]._id : null,
       customerId: auth.customerId
     })
   } catch (error) {
-    console.error('Error fetching contacts:', error)
+    console.error('Error fetching employees:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch contacts' },
+      { error: 'Failed to fetch employees' },
       { status: 500 }
     )
   }
@@ -87,71 +87,65 @@ export async function POST(request: NextRequest) {
 
     if (!firstConnection) {
       return NextResponse.json(
-        { error: 'No apps connected to import contacts from' },
+        { error: 'No apps connected to import employees from' },
         { status: 400 }
       )
     }
 
-    let allContacts: any[] = []
+    let allEmployees: any[] = []
     let hasMore = true
     let cursor: string | null = null
 
-    // Fetch all contacts using pagination
+    // Fetch all employees using pagination
     while (hasMore) {
-      // Get contacts from the integration
       const result = await client
         .connection(firstConnection.id)
-        .action('get-contacts')
+        .action('list-employees')
         .run({
           ...(cursor ? { cursor } : {})
         })
 
       if (!result?.output?.records) {
-        throw new Error('Invalid response format from contacts API')
+        throw new Error('Invalid response format from employees API')
       }
 
-      // Store the cursor for the next iteration
       cursor = result.output.cursor || null
       hasMore = !!cursor
 
-      // Add the current page of records to our collection
-      allContacts = [...allContacts, ...result.output.records]
+      allEmployees = [...allEmployees, ...result.output.records]
 
-      // Optional: Add a small delay to avoid rate limiting
       if (hasMore) {
         await new Promise(resolve => setTimeout(resolve, 100))
       }
     }
 
-    // Transform and save all contacts
-    const contacts = await Promise.all(
-      allContacts.map(async (record: any) => {
-        // Debug log to see the structure of the record
+    // Transform and save all employees
+    const employees = await Promise.all(
+      allEmployees.map(async (record: any) => {
         console.log('Record data:', {
           id: record.id,
           fields: record.fields,
           rawRecord: record
         })
 
-        const contactData = {
+        const employeeData = {
           customerId: auth.customerId,
-          contactId: record.id,
+          employeeId: record.id,
           name: record.name || record.fullName || record.fields?.fullName || 'Unknown',
+          title: record.title || record.fields?.title,
           email: record.primaryEmail || record.emails?.[0]?.value || record.fields?.primaryEmail,
           phone: record.primaryPhone || record.phones?.[0]?.value || record.fields?.primaryPhone,
-          source: record.source || record.fields?.source || 'Unknown',
+          dependents: String(record.dependents || record.fields?.dependents || ''),
         }
 
-        // Debug log the final contact data
-        console.log('Contact data being saved:', contactData)
+        console.log('Employee data being saved:', employeeData)
 
-        // Upsert the contact
-        return Contact.findOneAndUpdate(
+        return Employee.findOneAndUpdate(
           { 
-            customerId: contactData.customerId,
-            contactId: contactData.contactId
+            customerId: employeeData.customerId,
+            employeeId: employeeData.employeeId
           },
-          contactData,
+          employeeData,
           { 
             upsert: true, 
             new: true,
@@ -161,11 +155,11 @@ export async function POST(request: NextRequest) {
       })
     )
 
-    return NextResponse.json({ contacts })
+    return NextResponse.json({ employees })
   } catch (error) {
-    console.error('Error importing contacts:', error)
+    console.error('Error importing employees:', error)
     return NextResponse.json(
-      { error: 'Failed to import contacts' },
+      { error: 'Failed to import employees' },
       { status: 500 }
     )
   }

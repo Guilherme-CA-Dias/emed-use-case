@@ -106,13 +106,13 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         customerId: auth.customerId,
         type: 'created',
-        event: 'contact.created',
+        event: 'employee.created',
         record: data
       })
     })
 
     if (!webhookResponse.ok) {
-      throw new Error('Failed to trigger contact creation flow')
+      throw new Error('Failed to trigger employee creation flow')
     }
 
     const webhookData = await webhookResponse.json()
@@ -129,14 +129,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true,
-      message: 'Contact created successfully',
+      message: 'Employee created successfully',
       flowStatus
     })
 
   } catch (error) {
-    console.error('Error creating contact:', error)
+    console.error('Error creating employee:', error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to create contact' },
+      { error: error instanceof Error ? error.message : 'Failed to create employee' },
       { status: 500 }
     )
   }

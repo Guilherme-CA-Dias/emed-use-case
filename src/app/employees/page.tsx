@@ -1,19 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { ContactsTable } from "./components/contacts-table"
-import { CreateContactModal } from "./components/create-contact-modal"
-import { useContacts } from "@/hooks/use-contacts"
+import { EmployeesTable } from "./components/employees-table"
+import { useEmployees } from "@/hooks/use-employees"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { RefreshCw, Download, Search, Loader2, UserPlus } from "lucide-react"
+import { RefreshCw, Download, Search, Loader2 } from "lucide-react"
 import { useEffect } from "react"
 import { useIntegrations } from "@integration-app/react"
 
-export default function ContactsPage() {
-  const [createModalOpen, setCreateModalOpen] = useState(false)
+export default function EmployeesPage() {
   const { 
-    contacts, 
+    employees,
     isLoading,
     isSearching,
     error, 
@@ -22,9 +20,9 @@ export default function ContactsPage() {
     handleSearch,
     refresh, 
     loadMore, 
-    importContacts,
+    importEmployees,
     customerId
-  } = useContacts()
+  } = useEmployees()
   const { integrations } = useIntegrations()
 
   useEffect(() => {
@@ -38,13 +36,13 @@ export default function ContactsPage() {
         <div className="flex flex-col gap-4">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Contacts</h1>
-              <p className="text-muted-foreground">View all your contacts</p>
+              <h1 className="text-3xl font-bold tracking-tight">Employees</h1>
+              <p className="text-muted-foreground">View all your employees</p>
             </div>
           </div>
           <div className="rounded-md border p-8 text-center">
             <p className="text-muted-foreground">
-              Please connect an integration first to view contacts.
+              Please connect an integration first to view employees.
             </p>
           </div>
         </div>
@@ -57,15 +55,11 @@ export default function ContactsPage() {
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Contacts</h1>
-            <p className="text-muted-foreground">View all your contacts</p>
+            <h1 className="text-3xl font-bold tracking-tight">Employees</h1>
+            <p className="text-muted-foreground">View all your employees</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={() => setCreateModalOpen(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Create Contact
-            </Button>
-            <Button onClick={importContacts} disabled={isLoading || isSearching}>
+            <Button onClick={importEmployees} disabled={isLoading || isSearching}>
               <Download className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
               Import
             </Button>
@@ -81,7 +75,7 @@ export default function ContactsPage() {
           <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search contacts..."
+              placeholder="Search employees..."
               className="pl-8"
               value={searchQuery}
               onChange={(e) => handleSearch(e.target.value)}
@@ -101,8 +95,8 @@ export default function ContactsPage() {
             </p>
           </div>
         )}
-        <ContactsTable 
-          contacts={contacts} 
+        <EmployeesTable 
+          employees={employees} 
           isLoading={isLoading} 
           isError={error} 
         />
@@ -127,12 +121,6 @@ export default function ContactsPage() {
           </div>
         )}
       </div>
-
-      <CreateContactModal 
-        open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
-        customerId={customerId}
-      />
     </div>
   )
 } 
